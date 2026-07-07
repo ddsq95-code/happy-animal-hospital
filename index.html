@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>행복한 동물병원 | 프리미엄 펫 케어</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: 조금 더 부드러운 고딕 사용 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans KR"', 'sans-serif'],
+                    },
+                    colors: {
+                        // 레퍼런스를 참고한 올리브 그린 & 웜 베이지 테마
+                        primary: '#6B8E23', // Olive Drab 느낌의 그린
+                        primaryHover: '#556B2F', // Dark Olive Green
+                        primaryLight: '#F5F7F0', // 아주 옅은 그린/베이지 틴트
+                        secondary: '#D2B48C', // Tan (부드러운 갈색 포인트)
+                        bgWarm: '#FAFAF8', // 전체 배경용 따뜻한 화이트
+                    },
+                    boxShadow: {
+                        'soft': '0 20px 40px -15px rgba(0,0,0,0.05)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            background-color: #FAFAF8; /* bgWarm 적용 */
+            color: #333333;
+        }
+        
+        /* 페이지 전환 애니메이션 최적화 */
+        .page-section {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .page-section.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .page-section.hidden-section {
+            display: none;
+        }
+
+        /* 히어로 섹션 프리미엄 효과 - 부드러운 오버레이 */
+        .hero-bg {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.4)), url('https://images.unsplash.com/photo-1543852786-1cf6624b9987?auto=format&fit=crop&q=80&w=1920');
+            background-size: cover;
+            background-position: center 30%;
+            background-attachment: scroll; /* 모바일 성능을 위해 fixed 제거, 자연스럽게 스크롤되도록 */
+        }
+        
+        /* 헤더 투명도 제어 */
+        .header-transparent {
+            background-color: transparent;
+            box-shadow: none;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .header-transparent .nav-link { color: white; }
+        .header-transparent .logo-text { color: white; }
+        
+        .header-solid {
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .header-solid .nav-link { color: #4b5563; }
+        .header-solid .logo-text { color: #111827; }
+        
+        /* 이미지 원형 마스크 효과 */
+        .circle-img-wrap {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin: 0 auto;
+            border: 4px solid white;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            transition: transform 0.5s ease;
+        }
+        .circle-card:hover .circle-img-wrap {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- 내비게이션 바 -->
+    <header id="main-header" class="header-transparent fixed top-0 w-full z-50 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-24"> <!-- h-20에서 h-24로 늘려 여유 확보 -->
+                <!-- 로고 -->
+                <div class="flex items-center cursor-pointer group" onclick="navigate('page-home')">
+                    <i class="fa-solid fa-paw text-primary text-3xl mr-3 group-hover:scale-110 transition-transform"></i>
+                    <div class="flex flex-col">
+                        <span class="logo-text font-bold text-2xl tracking-tight transition-colors">행복한 동물병원</span>
+                        <span class="logo-text text-[10px] tracking-widest opacity-80 transition-colors uppercase">Happy Animal Hospital</span>
+                    </div>
+                </div>
+
+                <!-- 데스크탑 메뉴 -->
+                <nav class="hidden md:flex space-x-8 items-center">
+                    <button onclick="navigate('page-home')" class="nav-btn nav-link text-sm font-medium hover:text-primary transition-colors tracking-wide" data-target="page-home">홈</button>
+                    <button onclick="navigate('page-services')" class="nav-btn nav-link text-sm font-medium hover:text-primary transition-colors tracking-wide" data-target="page-services">진료안내</button>
+                    <button onclick="navigate('page-contact')" class="nav-btn nav-link text-sm font-medium hover:text-primary transition-colors tracking-wide" data-target="page-contact">오시는 길</button>
+                    <button onclick="navigate('page-contact')" class="ml-4 bg-white/20 border border-white/50 backdrop-blur-sm text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-white hover:text-primary transition-all duration-300" id="header-reserve-btn">
+                        진료 예약 문의
+                    </button>
+                </nav>
+
+                <!-- 모바일 메뉴 버튼 -->
+                <div class="flex items-center md:hidden">
+                    <button id="mobile-menu-btn" class="nav-link p-2 focus:outline-none transition-colors">
+                        <i class="fa-solid fa-bars text-2xl w-6 text-center"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 모바일 드롭다운 메뉴 -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white w-full shadow-2xl absolute top-full left-0 border-t border-gray-100">
+            <div class="px-6 py-8 space-y-4 text-center">
+                <button onclick="navigate('page-home'); toggleMobileMenu()" class="block w-full text-lg font-medium text-gray-800 hover:text-primary transition-colors" data-mobile-target="page-home">홈</button>
+                <div class="w-12 h-px bg-gray-200 mx-auto"></div>
+                <button onclick="navigate('page-services'); toggleMobileMenu()" class="block w-full text-lg font-medium text-gray-800 hover:text-primary transition-colors" data-mobile-target="page-services">진료안내</button>
+                <div class="w-12 h-px bg-gray-200 mx-auto"></div>
+                <button onclick="navigate('page-contact'); toggleMobileMenu()" class="block w-full text-lg font-medium text-gray-800 hover:text-primary transition-colors" data-mobile-target="page-contact">오시는 길</button>
+                <div class="pt-6">
+                    <button onclick="navigate('page-contact'); toggleMobileMenu()" class="inline-block bg-primary text-white border border-primary px-8 py-3 rounded-full font-medium shadow-md">
+                        진료 예약 문의
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 메인 컨텐츠 영역 -->
+    <main class="flex-grow">
+
+        <!-- 페이지 1: 홈 -->
+        <section id="page-home" class="page-section active">
+            <!-- 풀사이즈 히어로 섹션 (레퍼런스 스타일 반영) -->
+            <div class="relative w-full h-[85vh] min-h-[600px] hero-bg flex items-center">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 pt-20">
+                    <div class="max-w-2xl">
+                        <!-- 레퍼런스의 박스형 텍스트 영역 모방 -->
+                        <div class="bg-white/90 backdrop-blur-md p-10 md:p-14 border-l-4 border-primary inline-block shadow-2xl">
+                            <h2 class="text-primary font-bold text-sm tracking-widest mb-3">HAPPY ANIMAL HOSPITAL</h2>
+                            <h1 class="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900 leading-tight mb-6">
+                                따뜻한 돌봄과<br>
+                                최신 의료 기술이 결합된<br>
+                                <strong class="font-bold text-primary">반려동물 맞춤형 건강 관리</strong>
+                            </h1>
+                            <p class="text-gray-500 mb-8 font-light leading-relaxed">
+                                말 못하는 아이들의 아픔을 먼저 이해하고,<br class="hidden sm:block"> 가족 같은 마음으로 정성을 다해 진료하겠습니다.
+                            </p>
+                            <button onclick="navigate('page-services')" class="group flex items-center text-sm font-medium text-gray-600 hover:text-primary transition-colors">
+                                병원 둘러보기 
+                                <i class="fa-solid fa-arrow-right ml-2 text-xs border border-gray-300 rounded-full p-1.5 group-hover:border-primary group-hover:bg-primary group-hover:text-white transition-all"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 전문 진료 안내 섹션 (레퍼런스의 원형 이미지 레이아웃 반영) -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-4">전문 진료 안내</h2>
+                    <div class="w-12 h-1 bg-primary mx-auto"></div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-16 text-center">
+                    <!-- 아이템 1 -->
+                    <div class="circle-card cursor-pointer group" onclick="navigate('page-services')">
+                        <div class="circle-img-wrap mb-8">
+                            <img src="https://images.unsplash.com/photo-1576201836106-db1758fd1c97?auto=format&fit=crop&q=80&w=400" alt="강아지 수술" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="text-xl font-bold mb-4 text-gray-900">전문 외과수술</h3>
+                        <p class="text-gray-500 text-sm leading-relaxed px-4">
+                            최신 의료 장비와 풍부한 경험의 수의사 협진을 통해 안전하고 스트레스 없는 수술을 제공합니다. 세심한 사후 관리로 빠른 회복을 보장합니다.
+                        </p>
+                    </div>
+                    
+                    <!-- 아이템 2 -->
+                    <div class="circle-card cursor-pointer group" onclick="navigate('page-services')">
+                        <div class="circle-img-wrap mb-8">
+                            <img src="https://images.unsplash.com/photo-1541364983171-a8ba01e95cfc?auto=format&fit=crop&q=80&w=400" alt="반려견 산책" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="text-xl font-bold mb-4 text-gray-900">내과 및 심장센터</h3>
+                        <p class="text-gray-500 text-sm leading-relaxed px-4">
+                            개인 맞춤형 진료 프로그램을 통해 노령 동물의 삶의 질을 높입니다. 정밀한 초음파 기기와 전문적인 진단으로 세밀한 호전을 돕습니다.
+                        </p>
+                    </div>
+                    
+                    <!-- 아이템 3 -->
+                    <div class="circle-card cursor-pointer group" onclick="navigate('page-services')">
+                        <div class="circle-img-wrap mb-8">
+                            <img src="https://images.unsplash.com/photo-1623387641177-e8a49c0b37f4?auto=format&fit=crop&q=80&w=400" alt="수건 덮은 고양이" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="text-xl font-bold mb-4 text-gray-900">건강검진센터</h3>
+                        <p class="text-gray-500 text-sm leading-relaxed px-4">
+                            정밀한 진단 장비를 갖추고 있어, 조기 발견과 예방이 가능합니다. 정기 검진을 통해 동물의 전반적인 건강을 지속적으로 관리합니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 그린 배경의 브랜딩 섹션 (레퍼런스 반영) -->
+            <div class="bg-primary text-white py-24">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex flex-col md:flex-row items-center justify-between gap-12">
+                        <div class="md:w-1/2">
+                            <h2 class="text-3xl font-light leading-snug mb-6">
+                                행복한 동물병원은 단순히 치료를 제공하는 것을 넘어,<br>
+                                <strong class="font-bold">동물들의 전반적인 삶의 질을 향상</strong>시키기 위해 노력합니다.
+                            </h2>
+                            <p class="text-primaryLight opacity-90 font-light leading-relaxed mb-8">
+                                국내 유일의 특화된 노령동물 케어센터와 포괄적인 건강검진센터로서<br>
+                                동물의 건강과 행복을 최우선으로 생각하는 따뜻한 마음을 지닌 병원입니다.
+                            </p>
+                            <button onclick="navigate('page-contact')" class="border border-white hover:bg-white hover:text-primary px-8 py-3 rounded-full text-sm font-medium transition-colors">
+                                병원 찾아오기
+                            </button>
+                        </div>
+                        <div class="md:w-1/2">
+                            <img src="https://images.unsplash.com/photo-1596492784531-6e6eb5ea9993?auto=format&fit=crop&q=80&w=800" alt="따뜻한 병원 전경" class="rounded-lg shadow-2xl">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 의료진 소개 섹션 -->
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
+                <div class="text-center mb-16">
+                    <span class="text-primary font-bold text-sm tracking-widest uppercase">Our Doctor</span>
+                    <h2 class="text-3xl font-bold text-gray-900 mt-2 mb-4">함께하는 의료진</h2>
+                    <p class="text-gray-500 font-light">동물의 목소리를 듣고, 그들의 눈높이에서 진료합니다.</p>
+                </div>
+                
+                <div class="bg-white p-8 md:p-12 border border-gray-100 shadow-soft flex flex-col md:flex-row gap-12 items-center">
+                    <!-- 의사 프로필 이미지 (세로형) -->
+                    <div class="w-full md:w-1/3">
+                        <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=600" alt="대표원장" class="w-full h-[400px] object-cover object-center grayscale hover:grayscale-0 transition-all duration-700">
+                    </div>
+                    
+                    <!-- 의사 소개 및 이력 -->
+                    <div class="w-full md:w-2/3">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-1">김수의 <span class="text-lg font-normal text-gray-400">대표원장</span></h3>
+                        <p class="text-primary font-medium text-sm mb-6 pb-6 border-b border-gray-100">전문 분야: 내과, 노령동물 케어</p>
+                        
+                        <h4 class="font-bold text-gray-900 mb-3 text-sm">학력 및 경력:</h4>
+                        <ul class="text-gray-500 space-y-2 text-sm list-disc list-inside mb-8">
+                            <li>서울대학교 수의과대학 졸업</li>
+                            <li>서울대학교 수의학 대학원 석사</li>
+                            <li>XYZ 동물메디컬센터 내과 과장 (7년)</li>
+                            <li>한국수의내과학회 정회원</li>
+                        </ul>
+
+                        <h4 class="font-bold text-gray-900 mb-3 text-sm">소개:</h4>
+                        <p class="text-gray-500 text-sm leading-relaxed mb-6 font-light">
+                            김수의 원장은 내과 및 노령동물 케어 분야에서 10년 이상의 경력을 가진 전문가입니다. 반려동물의 빠른 회복을 위해 최신 의료 기기와 맞춤형 프로그램을 병행하며, 보호자와의 소통을 중요시합니다. 항상 동물의 입장에서 생각하며, 따뜻한 마음과 세심한 손길로 최상의 치료를 제공하기 위해 노력하고 있습니다.
+                        </p>
+                        
+                        <button onclick="navigate('page-services')" class="text-sm border border-gray-300 text-gray-600 px-6 py-2 hover:border-primary hover:text-primary transition-colors">
+                            진료과목 보기
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 페이지 2: 진료 안내 (그리드 레이아웃 개선) -->
+        <section id="page-services" class="page-section hidden-section py-16 md:py-24">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <span class="text-primary font-bold tracking-widest text-sm uppercase">Our Services</span>
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mt-2 mb-4">진료 과목 안내</h2>
+                    <p class="text-gray-500 max-w-2xl mx-auto text-lg">생애 주기에 맞춘 체계적이고 전문적인 토탈 케어 서비스</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- 내과 -->
+                    <div class="bg-white rounded-3xl p-8 shadow-soft border border-gray-100 hover:shadow-xl transition-shadow group relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -z-10 transition-transform group-hover:scale-150"></div>
+                        <div class="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mb-6">
+                            <i class="fa-solid fa-notes-medical text-2xl text-blue-600"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-4 text-gray-900">내과 진료</h3>
+                        <ul class="text-gray-500 space-y-3 text-sm">
+                            <li class="flex items-center"><div class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></div>종합 건강검진 및 예방접종</li>
+                            <li class="flex items-center"><div class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></div>소화기 / 호흡기 질환</li>
+                            <li class="flex items-center"><div class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></div>호르몬 및 심혈관계 질환</li>
+                            <li class="flex items-center"><div class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></div>노령 동물 집중 케어</li>
+                        </ul>
+                    </div>
+
+                    <!-- 외과 -->
+                    <div class="bg-white rounded-3xl p-8 shadow-soft border border-gray-100 hover:shadow-xl transition-shadow group relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-green-50 rounded-bl-full -z-10 transition-transform group-hover:scale-150"></div>
+                        <div class="w-14 h-14 bg-green-100 rounded-2xl flex items-center justify-center mb-6">
+                            <i class="fa-solid fa-scissors text-2xl text-green-600"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-4 text-gray-900">외과 수술</h3>
+                        <ul class="text-gray-500 space-y-3 text-sm">
+                            <li class="flex items-center"><div class="w-1.5 h-1.5 bg-green-400 rounded-full mr-2"></div>안전한 중성화 수술</li>
+                            <li class="flex items-center"><div class="w-1.5 h-1.5 bg-green-400 rounded-full mr-2"></div>슬개골 탈구 및 정형외과</li>
+                            <li class="flex items-center"><div class="w-1.5 h-1.5 bg-green-400 rounded-full mr-2"></div>종양 제거 및 연부조직 수술</li>
+                            <li class="flex items-center"><div class="w-1.5 h-1.5 bg-green-400 rounded-full mr-2"></div>최신 호흡 마취 모니터링</li>
+                        </ul>
+                    </div>
+
+                    <!-- 치과 -->
+                    <div class="bg-white rounded-3xl p-8 shadow-soft border border-gray-100 hover:shadow-xl transition-shadow group relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-yellow-50 rounded-bl-full -z-10 transition-transform group-hover:scale-150"></div>
+                        <div class="w-14 h-14 bg-yellow-100 rounded-2xl flex items-center justify-center mb-6">
+                            <i class="fa-solid fa-tooth text-2xl text-yellow-600"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-4 text-gray-900">치과 진료</h3>
+                        <ul class="text-gray-500 space-y-3 text-sm">
+                            <li class="flex items-center"><div class="w-1.5 h-1.5 bg-yellow-400 rounded-full mr-2"></div>무통 초음파 스케일링</li>
+                            <li class="flex items-center"><div class="w-1.5 h-1.5 bg-yellow-400 rounded-full mr-2"></div>치과 전용 X-ray 촬영</li>
+                            <li class="flex items-center"><div class="w-1.5 h-1.5 bg-yellow-400 rounded-full mr-2"></div>안전한 발치 및 구강 수술</li>
+                            <li class="flex items-center"><div class="w-1.5 h-1.5 bg-yellow-400 rounded-full mr-2"></div>중증 치주염 집중 치료</li>
+                        </ul>
+                    </div>
+
+                    <!-- 입원/미용 -->
+                    <div class="bg-white rounded-3xl p-8 shadow-soft border border-gray-100 hover:shadow-xl transition-shadow group relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-purple-50 rounded-bl-full -z-10 transition-transform group-hover:scale-150"></div>
+                        <div class="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center mb-6">
+                            <i class="fa-solid fa-house-medical text-2xl text-purple-600"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-4 text-gray-900">호텔 및 특수 미용</h3>
+                        <ul class="text-gray-500 space-y-3 text-sm">
+                            <li class="flex items-center"><div class="w-1.5 h-1.5 bg-purple-400 rounded-full mr-2"></div>24시간 수의사 모니터링 입원실</li>
+                            <li class="flex items-center"><div class="w-1.5 h-1.5 bg-purple-400 rounded-full mr-2"></div>넓고 쾌적한 VIP 호텔링</li>
+                            <li class="flex items-center"><div class="w-1.5 h-1.5 bg-purple-400 rounded-full mr-2"></div>피부병 맞춤 약용 목욕</li>
+                            <li class="flex items-center"><div class="w-1.5 h-1.5 bg-purple-400 rounded-full mr-2"></div>마취 미용 (노령동물/고양이)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 페이지 3: 오시는 길 / 예약 (폼 디자인 모던화) -->
+        <!-- 페이지 2: 진료 안내 -->
+        <section id="page-services" class="page-section hidden-section py-24 md:py-32 bg-white">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-20">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6">진료 안내</h2>
+                    <div class="w-12 h-1 bg-primary mx-auto mb-6"></div>
+                    <p class="text-gray-500 font-light text-lg">생애 주기에 맞춘 체계적이고 전문적인 토탈 케어 서비스</p>
+                </div>
+
+                <!-- 레퍼런스의 세로 나열식 텍스트+이미지 레이아웃 차용 -->
+                <div class="space-y-24">
+                    <!-- 항목 1 -->
+                    <div class="flex flex-col md:flex-row gap-10 items-center">
+                        <div class="w-full md:w-1/2">
+                            <img src="https://images.unsplash.com/photo-1584815682414-7f12e8ba46f7?auto=format&fit=crop&q=80&w=800" alt="내과 진료" class="w-full h-64 object-cover shadow-lg">
+                        </div>
+                        <div class="w-full md:w-1/2">
+                            <h3 class="text-2xl font-bold text-primary mb-4">정밀한 내과 진료</h3>
+                            <p class="text-gray-600 font-light leading-relaxed mb-4">
+                                종합 건강검진, 예방접종부터 소화기, 호흡기, 내분비 질환까지 전반적인 내과 진료를 담당합니다. 특히 노령 반려동물을 위한 세밀한 모니터링과 맞춤형 약물 치료에 특화되어 있습니다.
+                            </p>
+                            <ul class="text-sm text-gray-500 space-y-2">
+                                <li>· 생애주기별 건강검진</li>
+                                <li>· 심혈관계 질환 초음파 진단</li>
+                                <li>· 호르몬 질환 관리</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 항목 2 -->
+                    <div class="flex flex-col md:flex-row-reverse gap-10 items-center">
+                        <div class="w-full md:w-1/2">
+                            <img src="https://images.unsplash.com/photo-1628009368231-7bb7cbcb8122?auto=format&fit=crop&q=80&w=800" alt="외과 수술" class="w-full h-64 object-cover shadow-lg">
+                        </div>
+                        <div class="w-full md:w-1/2">
+                            <h3 class="text-2xl font-bold text-primary mb-4">안전 우선 외과 수술</h3>
+                            <p class="text-gray-600 font-light leading-relaxed mb-4">
+                                철저한 마취 전 검사와 호흡 마취, 실시간 모니터링 시스템을 통해 가장 안전한 수술 환경을 제공합니다. 중성화, 슬개골 탈구, 종양 제거 등 다양한 수술을 진행합니다.
+                            </p>
+                            <ul class="text-sm text-gray-500 space-y-2">
+                                <li>· 최소 절개 중성화 수술</li>
+                                <li>· 정형외과 및 연부조직 수술</li>
+                                <li>· 최신 마취 모니터링 시스템</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 페이지 3: 오시는 길 / 예약 (심플한 레퍼런스 폼 반영) -->
+        <section id="page-contact" class="page-section hidden-section py-24 bg-bgWarm">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6">진료 시간 · 예약안내</h2>
+                    <div class="w-12 h-1 bg-primary mx-auto"></div>
+                </div>
+
+                <!-- 진료시간 테이블 -->
+                <div class="bg-white border border-gray-200 mb-16 shadow-sm">
+                    <div class="grid grid-cols-1 md:grid-cols-2">
+                        <div class="p-8 border-b md:border-b-0 md:border-r border-gray-200">
+                            <h3 class="text-primary font-bold text-lg mb-4">진료 시간</h3>
+                            <div class="flex justify-between text-gray-600 mb-2 font-light">
+                                <span>월 - 토요일</span>
+                                <span>오전 09:30 - 오후 7:00</span>
+                            </div>
+                            <div class="flex justify-between text-gray-600 mb-2 font-light">
+                                <span>점심시간</span>
+                                <span>오후 1:00 - 오후 2:00</span>
+                            </div>
+                            <div class="flex justify-between text-red-500 mt-4 font-medium">
+                                <span>일요일 / 공휴일</span>
+                                <span>휴진</span>
+                            </div>
+                        </div>
+                        <div class="p-8 flex flex-col justify-center">
+                            <h3 class="text-primary font-bold text-lg mb-2">진료 예약 문의</h3>
+                            <p class="text-3xl font-light text-gray-900 mb-4">02-1234-5678</p>
+                            <p class="text-sm text-gray-500 font-light leading-relaxed">
+                                매 환자에게 최선의 진료를 제공하기 위해 예약제로 운영하고 있습니다.<br>
+                                반드시 진료 예약 후 방문해 주시기 바랍니다.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 지도 영역 -->
+                <div class="mb-20">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6 text-center">오시는 길</h3>
+                    <div class="flex flex-col md:flex-row gap-8 items-center bg-white p-4 border border-gray-100 shadow-sm">
+                        <!-- 구글맵 연동 부분 (레퍼런스의 지도 연동 형태) -->
+                        <div class="w-full md:w-2/3 h-[300px] bg-gray-200 relative overflow-hidden">
+                            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3165.2631526463943!2d127.0267595!3d37.5017208!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzfCsDMwJzA2LjIiTiAxMjfCsDAxJzM2LjMiRQ!5e0!3m2!1sko!2skr!4v1620000000000!5m2!1sko!2skr" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                        </div>
+                        <div class="w-full md:w-1/3 p-4">
+                            <h4 class="font-bold text-gray-900 mb-2">행복한 동물병원 위치</h4>
+                            <div class="w-8 h-px bg-primary mb-4"></div>
+                            <p class="text-sm text-gray-600 font-light mb-2">서울특별시 강남구 멍냥대로 123<br>행복빌딩 2층</p>
+                            <p class="text-sm text-gray-600 font-light">TEL. 02-1234-5678</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 심플한 온라인 예약 폼 (레퍼런스 스타일) -->
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-8 text-center">온라인 문의</h3>
+                    
+                    <div class="bg-white p-8 border border-gray-100 shadow-sm relative">
+                        <!-- 성공 메시지 -->
+                        <div id="success-message" class="hidden absolute inset-0 bg-white z-10 flex flex-col items-center justify-center text-center">
+                            <i class="fa-solid fa-check text-4xl text-primary mb-4"></i>
+                            <h4 class="text-xl font-bold text-gray-900 mb-2">문의가 접수되었습니다.</h4>
+                            <p class="text-gray-500 font-light mb-6">빠른 시일 내에 연락드리겠습니다.</p>
+                            <button onclick="resetForm()" class="border border-gray-300 px-6 py-2 text-sm text-gray-600 hover:text-primary hover:border-primary transition-colors">다시 작성하기</button>
+                        </div>
+
+                        <form id="booking-form" onsubmit="handleFormSubmit(event)" class="space-y-6">
+                            <div class="border-b border-gray-200 pb-2 flex items-center">
+                                <label class="w-24 text-sm font-medium text-gray-700">성함 <span class="text-red-500">*</span></label>
+                                <input type="text" name="ownerName" required class="flex-grow bg-transparent border-none focus:ring-0 text-gray-900 text-sm outline-none px-2" placeholder="홍길동">
+                            </div>
+                            
+                            <div class="border-b border-gray-200 pb-2 flex items-center">
+                                <label class="w-24 text-sm font-medium text-gray-700">연락처 <span class="text-red-500">*</span></label>
+                                <input type="tel" name="phone" required class="flex-grow bg-transparent border-none focus:ring-0 text-gray-900 text-sm outline-none px-2" placeholder="010-0000-0000">
+                            </div>
+                            
+                            <div class="border-b border-gray-200 pb-2 flex items-start pt-2">
+                                <label class="w-24 text-sm font-medium text-gray-700 pt-1">문의 내용 <span class="text-red-500">*</span></label>
+                                <textarea name="message" required rows="3" class="flex-grow bg-transparent border-none focus:ring-0 text-gray-900 text-sm outline-none px-2 resize-none" placeholder="문의하실 내용을 작성해주세요."></textarea>
+                            </div>
+
+                            <div class="flex items-center justify-between pt-4">
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="privacy" required class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded cursor-pointer">
+                                    <label for="privacy" class="ml-2 block text-xs text-gray-500 cursor-pointer">
+                                        개인정보 수집 및 이용 동의
+                                    </label>
+                                </div>
+                                <button type="submit" id="submit-btn" class="bg-gray-900 text-white px-8 py-2.5 text-sm font-medium hover:bg-primary transition-colors">
+                                    작성완료
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 푸터 -->
+    <footer class="bg-[#2A2A2A] text-gray-400 py-12 text-center text-sm font-light mt-auto">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-center items-center mb-6 opacity-50">
+                <i class="fa-solid fa-paw text-2xl mr-2"></i>
+                <span class="font-medium text-lg tracking-widest uppercase">Happy Animal Hospital</span>
+            </div>
+            <p class="mb-2">상호명: 행복한 동물병원 | 대표자: 김수의 | 사업자등록번호: 123-45-67890</p>
+            <p class="mb-6">주소: 서울특별시 강남구 멍냥대로 123 | 대표전화: 02-1234-5678</p>
+            <p class="text-gray-600">&copy; 2026 Happy Animal Hospital. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // --- 스크롤 시 헤더 스타일 변경 (투명 -> 솔리드) ---
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('main-header');
+            const reserveBtn = document.getElementById('header-reserve-btn');
+            const isHomePage = document.getElementById('page-home').classList.contains('active');
+
+            if (window.scrollY > 50) {
+                header.classList.remove('header-transparent');
+                header.classList.add('header-solid');
+                // 버튼 스타일 반전
+                reserveBtn.classList.remove('bg-white/20', 'border-white/50', 'text-white', 'hover:bg-white', 'hover:text-primary');
+                reserveBtn.classList.add('bg-primary', 'text-white', 'border-primary', 'hover:bg-primaryHover');
+            } else {
+                // 홈 화면 최상단일 때만 투명 헤더 적용
+                if(isHomePage) {
+                    header.classList.add('header-transparent');
+                    header.classList.remove('header-solid');
+                    // 버튼 스타일 복구
+                    reserveBtn.classList.add('bg-white/20', 'border-white/50', 'text-white', 'hover:bg-white', 'hover:text-primary');
+                    reserveBtn.classList.remove('bg-primary', 'text-white', 'border-primary', 'hover:bg-primaryHover');
+                }
+            }
+        });
+
+        // --- 페이지 전환 (SPA 라우팅) ---
+        function navigate(pageId) {
+            const sections = document.querySelectorAll('.page-section');
+            sections.forEach(section => {
+                section.classList.remove('active');
+                setTimeout(() => {
+                    if(!section.classList.contains('active')) {
+                        section.classList.add('hidden-section');
+                    }
+                }, 400); 
+            });
+
+            const targetSection = document.getElementById(pageId);
+            if (targetSection) {
+                targetSection.classList.remove('hidden-section');
+                setTimeout(() => {
+                    targetSection.classList.add('active');
+                }, 50);
+            }
+
+            // 헤더 스타일 강제 업데이트 (홈화면 ↔ 다른화면 전환 시)
+            const header = document.getElementById('main-header');
+            const reserveBtn = document.getElementById('header-reserve-btn');
+            if(pageId !== 'page-home') {
+                header.classList.remove('header-transparent');
+                header.classList.add('header-solid');
+                reserveBtn.classList.remove('bg-white/20', 'border-white/50', 'text-white', 'hover:bg-white', 'hover:text-primary');
+                reserveBtn.classList.add('bg-primary', 'text-white', 'border-primary', 'hover:bg-primaryHover');
+            } else {
+                // 스크롤이 최상단일 때만 투명 적용
+                if(window.scrollY <= 50) {
+                    header.classList.add('header-transparent');
+                    header.classList.remove('header-solid');
+                    reserveBtn.classList.add('bg-white/20', 'border-white/50', 'text-white', 'hover:bg-white', 'hover:text-primary');
+                    reserveBtn.classList.remove('bg-primary', 'text-white', 'border-primary', 'hover:bg-primaryHover');
+                }
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- 모바일 메뉴 토글 ---
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const header = document.getElementById('main-header');
+
+        function toggleMobileMenu() {
+            mobileMenu.classList.toggle('hidden');
+            const icon = mobileMenuBtn.querySelector('i');
+            
+            if (mobileMenu.classList.contains('hidden')) {
+                icon.classList.remove('fa-xmark');
+                icon.classList.add('fa-bars');
+                // 메뉴 닫을 때 스크롤이 최상단이면 다시 투명하게
+                if(window.scrollY <= 50 && document.getElementById('page-home').classList.contains('active')) {
+                     header.classList.add('header-transparent');
+                     header.classList.remove('header-solid');
+                }
+            } else {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-xmark');
+                // 메뉴 열 때는 무조건 솔리드 배경
+                header.classList.remove('header-transparent');
+                header.classList.add('header-solid');
+            }
+        }
+        mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+
+        // --- 폼 제출 시뮬레이션 ---
+        function handleFormSubmit(event) {
+            event.preventDefault(); 
+            const form = event.target;
+            const submitBtn = document.getElementById('submit-btn');
+            const originalBtnHtml = submitBtn.innerHTML;
+
+            submitBtn.innerHTML = '전송 중...';
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-80', 'cursor-not-allowed');
+
+            setTimeout(() => {
+                const successMessage = document.getElementById('success-message');
+                successMessage.classList.remove('hidden');
+                
+                submitBtn.innerHTML = originalBtnHtml;
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-80', 'cursor-not-allowed');
+            }, 1000);
+        }
+
+        function resetForm() {
+            document.getElementById('booking-form').reset();
+            document.getElementById('success-message').classList.add('hidden');
+        }
+
+        // 초기화
+        document.addEventListener('DOMContentLoaded', () => {
+            navigate('page-home');
+        });
+    </script>
+</body>
+</html>
